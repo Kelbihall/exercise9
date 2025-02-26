@@ -1,0 +1,94 @@
+
+---
+title: "Ozone Analysis"
+author: "Kelbi Hall"
+date: "2025-02-26"
+output: 
+  html_document:
+    self-contained: true
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(broom)
+library(ggplot2)
+
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## **Introduction**
+This analysis predicts Ozone levels based on Solar Radiation, Wind, and Temperature.
+
+---
+
+## **Load and Clean Data**
+
+```{r}
+
+data("airquality")
+
+
+cleaned_data <- airquality %>% drop_na(Ozone)
+```
+
+---
+
+## **Fit a Linear Model**
+
+```{r}
+
+ozone_model <- lm(Ozone ~ Solar.R + Wind + Temp, data = cleaned_data)
+
+
+r_squared <- summary(ozone_model)$r.squared
+
+
+cat("The R² value is", round(r_squared, 2), "indicating that", 
+    round(r_squared * 100, 1), "% of the variation in Ozone levels is explained 
+    by Solar Radiation, Wind, and Temperature.\n")
+```
+
+---
+
+## **Generate Predictions Using `broom::augment`**
+
+```{r}
+
+augmented_data <- augment(ozone_model)
+```
+
+---
+
+## **Plot Actual vs. Predicted Ozone Values**
+
+```{r}
+
+correlation <- cor(augmented_data$Ozone, augmented_data$.fitted, use = "complete.obs")
+
+
+ggplot(augmented_data, aes(x = Ozone, y = .fitted)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(
+    title = "Actual vs. Predicted Ozone Levels",
+    x = "Actual Ozone",
+    y = "Predicted Ozone",
+    subtitle = paste("Correlation:", round(correlation, 2))
+  ) +
+  theme_minimal()
+```
+
+---
+
+## **Save the Plot**
+
+```{r}
+
+if (!dir.exists("img")) {
+  dir.create("img")
+}
+
+
+ggsave("img/actual_vs_predicted_ozone.png", width = 8, height = 6)
