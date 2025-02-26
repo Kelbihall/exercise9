@@ -1,6 +1,6 @@
 
 ---
-title: "Ozone Analysis"
+title: "Daily Exercise 9"
 author: "Kelbi Hall"
 date: "2025-02-26"
 output: 
